@@ -2,8 +2,8 @@ import subprocess
 from scapy.all import sniff, DNS
 from termcolor import colored
 
-DNS_SERVER = "159.223.6.139"
-DOMAIN = "command.connect.menorraitdev.net"
+DNS_SERVER = "X.X.X.X"
+DOMAIN = "Your_DomainName.co.il"
 
 
 def print_banner():
