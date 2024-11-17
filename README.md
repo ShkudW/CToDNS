@@ -1,16 +1,7 @@
 
 # CToDNS - Command and Control Server Over DNS
 
-CToDNS is a Command and Control (C2) server that communicates with remote beacons over DNS, leveraging DNS TXT records for command transmission and DNS queries for response delivery.
-
----
-
-## Features
-- Communicate with remote machines using DNS TXT records.
-- Support for splitting large responses into manageable chunks.
-- Automatically decodes and displays responses from beacons.
-- Built-in nsupdate integration for dynamic DNS updates.
-- Interactive and color-coded CLI for seamless operation.
+CToDNS is a Command and Control (C2) server that communicates with remote beacons over DNS, leveraging DNS TXT records for command transmission and DNS CNAME queries for response delivery.
 
 ---
 
@@ -25,51 +16,87 @@ CToDNS is a Command and Control (C2) server that communicates with remote beacon
    ```bash
    pip install scapy termcolor
    ```
-3. DNS Server
+3. **DNS Server**
 A Bind9 DNS server configured to handle dynamic updates for the communication domain.
 
 
 ## Setting Up the DNS Server
 
-Step 1: Install Bind9
+Step 1: Set up a server with an external address, preferably with a Debian Linux operating system
+        I really like DigitalOcean
+        https://cloud.digitalocean.com/
+
+Step 2: Buy a domain name.
+        For the demonstration, I purchased the domain name - menorraitdev.mer
+
+Step 3: Configure your DNS server in Digitalocean.
+
+         NS        menorraitdev.net                  ns1.digitalocean.com.           -> NS Record for my Domain Name.
+         A         menorraitdev.net                  X.X.X.X (IPv4)                  -> A Record for my Domain Name.
+
+         A         ns1.connect.menorraitdev.net      X.X.X.X (IPv4)                  -> A Record for my DNS Domain name.
+         NS        connect.menorraitdev.net          ns1.connect.menorraitdev.net.   -> NS Record for my DNS Domain Name.
+
+Step 4: Install Bind9
  ```bash
 sudo apt update
 sudo apt install bind9 bind9utils
 ```
 
-Step 2: Configure the Zone
-Edit /etc/bind/named.conf.local to add the zone configuration:
+Step 5: Create the Zone File ->  /etc/bind/db.connect.menorraitdev.net
+
+```bash
+$ORIGIN .
+$TTL 3600       ; 1 hour
+connect.menorraitdev.net IN SOA ns1.connect.menorraitdev.net. admin.menorraitdev.net. (
+                                2024111723 ; serial
+                                1800       ; refresh (30 minutes)
+                                1800       ; retry (30 minutes)
+                                1209600    ; expire (2 weeks)
+                                86400      ; minimum (1 day)
+                                )
+                        NS      ns1.connect.menorraitdev.net.
+                        A       X.X.X.X - > your IP_Address
+$ORIGIN connect.menorraitdev.net.
+$TTL 60 ; 1 minute
+command                 TXT     "default"
+$TTL 3600       ; 1 hour
+ns1                     A       X.X.X.X - > your IP_Address
+```
+
+Step 6: Configure the Zone: edit the file ->  /etc/bind/named.conf.local
  ```bash
-zone "your_domain.co.il" {
+zone "connect.menorraitdev.net" {
     type master;
-    file "/etc/bind/db.your_domain.co.il";
+    file "/etc/bind/db.connect.menorraitdev.net";
     allow-update { localhost; };
 };
 ```
 
-Step 3: Create the Zone File
-Create the zone file /etc/bind/db.your_domain.co.il:
-```bash
-$TTL 3600
-@   IN  SOA ns1.your_domain.co.il. admin.your_domain.co.il. (
-        1       ; Serial
-        3600    ; Refresh
-        1800    ; Retry
-        604800  ; Expire
-        86400 ) ; Minimum TTL
-
-@       IN  NS      ns1.your_domain.co.il.
-ns1     IN  A       <YOUR_SERVER_IP>
-```
-
-Step 4: Set Permissions for Bind Updates
-Ensure Bind has permissions to write to the zone file:
+Step 7: Set Permissions for Bind Updates
 ```bash
 sudo chown bind:bind /etc/bind/db.connect.menorraitdev.net
 sudo chmod 660 /etc/bind/db.connect.menorraitdev.net
 ```
 
-Step 5: Start and Enable Bind9
+Step 8: Set Permissions for Bind Folder
+```bash
+sudo chown -R bind:bind /etc/bind
+sudo chmod 755 /etc/bind
+```
+
+Step 9: Canceling AppArmor's limitation on the named service
+```bash
+sudo ln -s /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
+sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.named
+```
+
+Step 10: Checking the Zone (Need to Get 'OK')
+```bash
+named-checkzone connect.menorraitdev.net /etc/bind/db.connect.menorraitdev.net
+```
+
+Step 11: Start and Enable Bind9
 Start and enable Bind9:
 ```bash
 sudo systemctl start bind9
@@ -79,8 +106,11 @@ sudo systemctl enable bind9
 
 ## Running the CToDNS Tool
 ```bash
+python3 -m venv CToDNS
+Source CToDNS/bin/active
 git clone https://github.com/ShudW/CToDNS.git
 cd CToDNS
+pip install scapy termcolor
 python3 CToDNS.py
 ```
 
@@ -89,24 +119,3 @@ python3 CToDNS.py
 Enter command to execute: whoami
 ```
 
-
-## DNS Configuration Validation
-Test the Zone
-Run the following command to ensure the zone is valid:
-```bash
-named-checkzone connect.menorraitdev.net /etc/bind/db.connect.menorraitdev.net
-```
-
-Test DNS Updates
-Test dynamic updates using nsupdate:
-```bash
-nsupdate
-> server 127.0.0.1
-> update add test.connect.menorraitdev.net 60 TXT "hello world"
-> send
-```
-
-Verify the record:
-```bash
-dig -t TXT test.connect.menorraitdev.net
-```
