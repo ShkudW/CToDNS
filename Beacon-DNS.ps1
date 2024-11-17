@@ -1,4 +1,4 @@
-$domain = "your_domain.co.il"
+$domain = "your_domain.co.il" #Put in here you Domain Name
 
 function Send-CnameQuery {
     param (
