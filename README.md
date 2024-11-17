@@ -27,7 +27,7 @@ Step 1: Set up a server with an external address, preferably with a Debian Linux
         https://cloud.digitalocean.com/
 
 Step 2: Buy a domain name.
-        For the demonstration, I purchased the domain name - menorraitdev.mer
+        For the demonstration, I purchased the domain name - menorraitdev.net
 
 Step 3: Configure your DNS server in Digitalocean.
 
