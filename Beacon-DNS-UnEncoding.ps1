@@ -1,5 +1,5 @@
-$domain = "command.connect.menorraitdev.net"
-$dnsServer = "159.223.6.139"
+$domain = "Your_DomainName.co.il"
+$dnsServer = "X.X.X.X"
 
 function Send-CnameQuery {
     param (
