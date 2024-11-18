@@ -1,7 +1,7 @@
 
 # CToDNS - Command and Control Server Over DNS
 
-CToDNS is a Command and Control (C2) server that communicates with remote beacons over DNS, leveraging DNS TXT records for command transmission and DNS CNAME queries for response delivery.
+CToDNS (Client To DNS) is a Command and Control (C2) server that communicates with remote beacons over DNS, leveraging DNS TXT records for command transmission and DNS CNAME queries for response delivery.
 
 ---
 
