@@ -72,31 +72,64 @@ zone "connect.menorraitdev.net" {
     allow-update { localhost; };
 };
 ```
+Step 7: Configura /etc/bind/named.conf.options file:
+ ```bash
+logging {
+    channel update_debug {
+        file "/var/log/named.update.log" versions 3 size 5m;
+        severity debug 3;
+        print-time yes;
+    };
+};
 
-Step 7: Set Permissions for Bind Updates
+options {
+    // If there is a firewall between you and nameservers you want
+    // to talk to, you may need to fix the firewall to allow multiple
+    // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+
+    // If your ISP provided one or more IP addresses for stable
+    // nameservers, you probably want to use them as forwarders.
+    // Uncomment the following block, and insert the addresses replacing
+    // the all-0's placeholder.
+
+    // forwarders {
+    //      0.0.0.0;
+    // };
+
+    //========================================================================
+    // If BIND logs error messages about the root key being expired,
+    // you will need to update your keys.  See https://www.isc.org/bind-keys
+    //========================================================================
+    dnssec-validation yes;
+
+    listen-on-v6 { any; };
+};
+```
+
+Step 8: Set Permissions for Bind Updates
 ```bash
 sudo chown bind:bind /etc/bind/db.connect.menorraitdev.net
 sudo chmod 660 /etc/bind/db.connect.menorraitdev.net
 ```
 
-Step 8: Set Permissions for Bind Folder
+Step 9: Set Permissions for Bind Folder
 ```bash
 sudo chown -R bind:bind /etc/bind
 sudo chmod 755 /etc/bind
 ```
 
-Step 9: Canceling AppArmor's limitation on the named service
+Step 10: Canceling AppArmor's limitation on the named service
 ```bash
 sudo ln -s /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
 sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.named
 ```
 
-Step 10: Checking the Zone (Need to Get 'OK')
+Step 11: Checking the Zone (Need to Get 'OK')
 ```bash
 named-checkzone connect.menorraitdev.net /etc/bind/db.connect.menorraitdev.net
 ```
 
-Step 11: Start and Enable Bind9
+Step 12: Start and Enable Bind9
 Start and enable Bind9:
 ```bash
 sudo systemctl start bind9
