@@ -31,11 +31,11 @@ Step 2: Buy a domain name.
 
 Step 3: Configure your DNS server in Digitalocean.
 
-         NS        menorraitdev.net                  ns1.digitalocean.com.           -> NS Record for my Domain Name.
-         A         menorraitdev.net                  X.X.X.X (IPv4)                  -> A Record for my Domain Name.
+         NS        mydomain.net                  ns1.digitalocean.com.           -> NS Record for my Domain Name.
+         A         mydomain.net                  X.X.X.X (IPv4)                  -> A Record for my Domain Name.
 
-         A         ns1.connect.menorraitdev.net      X.X.X.X (IPv4)                  -> A Record for my DNS Domain name.
-         NS        connect.menorraitdev.net          ns1.connect.menorraitdev.net.   -> NS Record for my DNS Domain Name.
+         A         ns1.connect.mydomain.net      X.X.X.X (IPv4)                  -> A Record for my DNS Domain name.
+         NS        connect.mydomain.net          ns1.connect.mydomain.net   -> NS Record for my DNS Domain Name.
 
 Step 4: Install Bind9
  ```bash
@@ -43,32 +43,32 @@ sudo apt update
 sudo apt install bind9 bind9utils
 ```
 
-Step 5: Create the Zone File ->  /etc/bind/db.connect.menorraitdev.net
+Step 5: Create the Zone File ->  /etc/bind/db.connect.mydomain.net
 
 ```bash
 $ORIGIN .
 $TTL 3600       ; 1 hour
-connect.menorraitdev.net IN SOA ns1.connect.menorraitdev.net. admin.menorraitdev.net. (
+connect.mydomain.net IN SOA ns1.connect.mydomain.net. admin.mydomain.net. (
                                 2024111723 ; serial
                                 1800       ; refresh (30 minutes)
                                 1800       ; retry (30 minutes)
                                 1209600    ; expire (2 weeks)
                                 86400      ; minimum (1 day)
                                 )
-                        NS      ns1.connect.menorraitdev.net.
+                        NS      ns1.connect.mydomain.net.
                         A       X.X.X.X - > your IP_Address
-$ORIGIN connect.menorraitdev.net.
+$ORIGIN connect.mydomain.net.
 $TTL 60 ; 1 minute
 command                 TXT     "default"
 $TTL 3600       ; 1 hour
-ns1                     A       X.X.X.X - > your IP_Address
+ns1                     A       X.X.X.X (You IPv4 //Remove this comment after configuration)
 ```
 
 Step 6: Configure the Zone: edit the file ->  /etc/bind/named.conf.local
  ```bash
-zone "connect.menorraitdev.net" {
+zone "connect.mydomain.net" {
     type master;
-    file "/etc/bind/db.connect.menorraitdev.net";
+    file "/etc/bind/db.connect.mydomain.net";
     allow-update { localhost; };
 };
 ```
@@ -108,8 +108,8 @@ options {
 
 Step 8: Set Permissions for Bind Updates
 ```bash
-sudo chown bind:bind /etc/bind/db.connect.menorraitdev.net
-sudo chmod 660 /etc/bind/db.connect.menorraitdev.net
+sudo chown bind:bind /etc/bind/db.connect.mydomain.net
+sudo chmod 660 /etc/bind/db.connect.mydomain.net
 ```
 
 Step 9: Set Permissions for Bind Folder
@@ -126,7 +126,7 @@ sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.named
 
 Step 11: Checking the Zone (Need to Get 'OK')
 ```bash
-named-checkzone connect.menorraitdev.net /etc/bind/db.connect.menorraitdev.net
+named-checkzone connect.mydomain.net /etc/bind/db.connect.mydomain.net
 ```
 
 Step 12: Start and Enable Bind9
